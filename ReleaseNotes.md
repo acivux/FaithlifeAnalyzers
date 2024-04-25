@@ -9,6 +9,9 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
+* Fix false positive diagnostic for FL0014 in StringBuilder.Append* methods.
+  * This bug was introduced in 1.3.0.
+
 ## 1.5.0
 
 * Add FL0019: Local functions used as event handlers (unless they are static, or else they are subscribed and later unsubscribed in the same method).

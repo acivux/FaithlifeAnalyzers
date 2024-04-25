@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
@@ -34,7 +32,10 @@ public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 		var invocationOperation = (IInterpolatedStringOperation)context.Operation;
 		var foundDollarSign = false;
 
-		if (!invocationOperation.Children.Any(child => child is IInterpolationOperation))
+		var operationDescendants = invocationOperation.Descendants().ToList();
+		var isEmptyInterpolatedString = !operationDescendants.Any();
+		var isUnnecessaryInterpolatedString = !isEmptyInterpolatedString && operationDescendants.Where(x => x.Type != null).All(x => x is ILiteralOperation && x.Type.SpecialType == SpecialType.System_String);
+		if (isEmptyInterpolatedString || isUnnecessaryInterpolatedString)
 			context.ReportDiagnostic(Diagnostic.Create(s_ruleUnnecessary, invocationOperation.Syntax.GetLocation()));
 
 		foreach (var child in invocationOperation.Children)

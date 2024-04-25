@@ -19,6 +19,10 @@ namespace TestApplication
 		{
 			string one = ""${hello}"";
 			string two = $""{one}"";
+			string numberStr = $""{1}"";
+			string floatStr = $""{1.0:0.00}"";
+			string charStr = $""{'x'}"";
+			string stringConcatStr = $""{""x"" + ""y""}"";
 		}
 	}
 }";
@@ -38,6 +42,39 @@ namespace TestApplication
 			string one = ""one"";
 			string two = $""{one} costs $0.00"";
 		}
+	}
+}";
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
+	public void ValidStringBuilder()
+	{
+		const string validProgram = @"
+using System;
+using System.Text;
+using System.Collections.Generic;
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass()
+		{
+			var builder = new StringBuilder();
+			var items = new List<(string Item1, TestClass2 Item2)>
+			{
+				(""one"", new TestClass2 { FileName = ""f1.txt"" }),
+				(""three"", null),
+			};
+			builder.Append($""{items[0].Item1}:{items[0].Item2.FileName}"");
+			builder.Insert(0, $""{items[0].Item1}:{items[0].Item2.FileName}"");
+			builder.AppendLine($""{items[0].Item1}:{items[0].Item2.FileName}"");
+			builder.AppendJoin($""{','} "", new[] { $""{items[1].Item1}"", $""{items[1].Item1}"" });
+		}
+	}
+	public class TestClass2
+	{
+		public string FileName { get; set; }
 	}
 }";
 		VerifyCSharpDiagnostic(validProgram);
@@ -134,6 +171,7 @@ namespace TestApplication
 		public TestClass()
 		{
 			string str = $""Hello World"";
+			string stringConcatStr = $""{$""x"" + ""y""}"";
 		}
 	}
 }";
@@ -143,6 +181,12 @@ namespace TestApplication
 			Message = "Avoid using an interpolated string where an equivalent literal string exists.",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
+		}, new DiagnosticResult
+		{
+			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
+			Message = "Avoid using an interpolated string where an equivalent literal string exists.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 32) },
 		});
 	}
 
